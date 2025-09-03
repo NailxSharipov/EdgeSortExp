@@ -1,4 +1,5 @@
 use crate::sort::layout::{BinKey, BinLayout};
+use crate::sort::parallel::cpu_count::CpuCount;
 use crate::sort::parallel::slice_one_key::OneKeyBinSortParallel;
 
 pub trait TwoKeysBinSortParallel<T> {
@@ -26,7 +27,8 @@ impl<T: Copy + Send> TwoKeysBinSortParallel<T> for [T] {
         KeyFn1: Fn(&T) -> K + Sync,
         KeyFn2: Fn(&T) -> K + Sync,
     {
-        let layout = if let Some(layout) = BinLayout::with_keys(self, key1) {
+        let max_bin_power = CpuCount::max_bin_power();
+        let layout = if let Some(layout) = BinLayout::with_keys_max_bins(max_bin_power, self, key1) {
             layout
         } else {
             // already sorted by key1
@@ -47,7 +49,8 @@ impl<T: Copy + Send> TwoKeysBinSortParallel<T> for [T] {
         KeyFn1: Fn(&T) -> K + Sync,
         KeyFn2: Fn(&T) -> K + Sync,
     {
-        let layout = if let Some(layout) = BinLayout::with_keys(self, key1) {
+        let max_bin_power = CpuCount::max_bin_power();
+        let layout = if let Some(layout) = BinLayout::with_keys_max_bins(max_bin_power, self, key1) {
             layout
         } else {
             // already sorted by key1

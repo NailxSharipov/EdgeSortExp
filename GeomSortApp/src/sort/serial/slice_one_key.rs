@@ -38,7 +38,6 @@ impl<T: Copy> OneKeyBinSortSerial<T> for [T] {
             return;
         };
 
-
         layout.sort_by_one_bin_key_and_buffer(self, buffer, key);
     }
 }

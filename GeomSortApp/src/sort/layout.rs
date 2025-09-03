@@ -35,10 +35,12 @@ where
     }
 
     #[inline(always)]
-    pub fn new(min_key: K, max_key: K) -> BinLayout<K> {
+    pub fn new(min_key: K, max_key: K, max_bins_power: u32) -> BinLayout<K> {
         let length = max_key.difference(min_key) + 1;
         let scale = length.ilog2_ceil();
-        let power = scale.saturating_sub(MAX_BINS_POWER) as usize;
+        let sub_power = max_bins_power.min(MAX_BINS_POWER);
+
+        let power = scale.saturating_sub(sub_power) as usize;
 
         Self {
             min_key,
@@ -48,7 +50,7 @@ where
     }
 
     #[inline]
-    pub fn with_keys<T, KeyFn>(array: &[T], key: &KeyFn) -> Option<Self>
+    pub fn with_keys_max_bins<T, KeyFn>(max_bins_power: u32, array: &[T], key: &KeyFn) -> Option<Self>
     where
         KeyFn: Fn(&T) -> K,
     {
@@ -68,7 +70,16 @@ where
             return None;
         }
 
-        Some(Self::new(min_key, max_key))
+        Some(Self::new(min_key, max_key, max_bins_power))
+    }
+
+
+    #[inline]
+    pub fn with_keys<T, KeyFn>(array: &[T], key: &KeyFn) -> Option<Self>
+    where
+        KeyFn: Fn(&T) -> K,
+    {
+        Self::with_keys_max_bins(MAX_BINS_POWER, array, key)
     }
 }
 
@@ -93,21 +104,21 @@ mod tests {
 
     #[test]
     fn test_0() {
-        let layout = BinLayout::<i32>::new(0i32, 3i32);
+        let layout = BinLayout::<i32>::new(0i32, 3i32, 8);
 
         assert_eq!(layout.power, 0);
     }
 
     #[test]
     fn test_1() {
-        let layout = BinLayout::<i32>::new(0, 255);
+        let layout = BinLayout::<i32>::new(0, 255, 8);
 
         assert_eq!(layout.power, 0);
     }
 
     #[test]
     fn test_2() {
-        let layout = BinLayout::<i32>::new(0, 256);
+        let layout = BinLayout::<i32>::new(0, 256, 8);
 
         assert_eq!(layout.power, 1);
     }
