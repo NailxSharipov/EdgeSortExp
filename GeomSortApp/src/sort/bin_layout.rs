@@ -8,7 +8,7 @@ pub struct BinLayout<K> {
 }
 
 pub const MAX_BINS_POWER: u32 = 8;
-pub const MIN_BINS_POWER: u32 = 6;
+// pub const MIN_BINS_POWER: u32 = 5;
 pub const MAX_BINS_COUNT: usize = 1 << MAX_BINS_POWER;
 
 impl<K> BinLayout<K>

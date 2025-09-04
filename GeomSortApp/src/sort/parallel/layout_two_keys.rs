@@ -31,24 +31,26 @@ impl<K: SortKey> BinLayout<K> {
 
         let mut ends = mapper.to_ends();
 
-        Self::par_sort_by_two_keys_and_ends(slice, &mut ends, 0, key1, key2);
+        Self::par_sort_by_two_keys_and_ends(slice, buffer, &mut ends, 0, key1, key2);
     }
 
     fn par_sort_by_two_keys_and_ends<T: Copy + Send>(
         slice: &mut [T],
+        buffer: &mut [T],
         ends: &mut [usize],
         base: usize,
         key1: SortKeyFn<T, K>,
         key2: SortKeyFn<T, K>,
     ) {
         if ends.len() < 2 {
-            slice.sort_by_two_keys(key1, key2);
+            slice.sort_by_two_keys_and_buffer(buffer, key1, key2);
             return
         }
 
         let mid = ends.len() / 2;
         let mid_end = ends[mid] - base;
         let (left_slice, right_slice) = slice.split_at_mut(mid_end);
+        let (left_buffer, right_buffer) = buffer.split_at_mut(mid_end);
 
         let is_left_big = left_slice.len() > MIN_LEN_PER_TASK;
         let is_right_big = right_slice.len() > MIN_LEN_PER_TASK;
@@ -61,12 +63,13 @@ impl<K: SortKey> BinLayout<K> {
             rayon::join(
                 || {
                     Self::par_sort_by_two_keys_and_ends(
-                        left_slice, left_ends, left_base, key1, key2,
+                        left_slice, left_buffer, left_ends, left_base, key1, key2,
                     )
                 },
                 || {
                     Self::par_sort_by_two_keys_and_ends(
                         right_slice,
+                        right_buffer,
                         right_ends,
                         right_base,
                         key1,
@@ -76,15 +79,15 @@ impl<K: SortKey> BinLayout<K> {
             );
         } else {
             if is_left_big {
-                left_slice.par_sort_by_two_keys(key1, key2);
+                left_slice.par_sort_by_two_keys_and_buffer(left_buffer, key1, key2);
             } else {
-                left_slice.sort_by_two_keys(key1, key2);
+                left_slice.sort_by_two_keys_and_buffer(left_buffer, key1, key2);
             }
 
             if is_right_big {
-                right_slice.par_sort_by_two_keys(key1, key2);
+                right_slice.par_sort_by_two_keys_and_buffer(right_buffer, key1, key2);
             } else {
-                right_slice.sort_by_two_keys(key1, key2);
+                right_slice.sort_by_two_keys_and_buffer(right_buffer, key1, key2);
             }
         }
     }
