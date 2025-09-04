@@ -1,13 +1,13 @@
-use crate::sort::layout::BinKeyFn;
+use crate::sort::key::SortKeyFn;
 
 pub(crate) trait MinMax<T> {
-    fn min_max<K>(&self, key: BinKeyFn<T, K>) -> (K, K)
+    fn min_max<K>(&self, key: SortKeyFn<T, K>) -> (K, K)
     where
         K: Copy + Ord;
 }
 
 impl<T> MinMax<T> for [T] {
-    fn min_max<K>(&self, key: BinKeyFn<T, K>) -> (K, K)
+    fn min_max<K>(&self, key: SortKeyFn<T, K>) -> (K, K)
     where
         K: Copy + Ord
     {

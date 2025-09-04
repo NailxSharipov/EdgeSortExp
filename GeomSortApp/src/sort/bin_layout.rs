@@ -1,17 +1,5 @@
+use crate::sort::key::{SortKey, SortKeyFn};
 use crate::sort::min_max::MinMax;
-
-pub type BinKeyFn<T, K> = fn(&T) -> K;
-
-pub trait BinKey: Copy + Ord {
-    fn difference(self, other: Self) -> usize;
-}
-
-impl BinKey for i32 {
-    #[inline(always)]
-    fn difference(self, other: Self) -> usize {
-        (self - other) as usize
-    }
-}
 
 pub struct BinLayout<K> {
     pub(crate) min_key: K,
@@ -25,7 +13,7 @@ pub const MAX_BINS_COUNT: usize = 1 << MAX_BINS_POWER;
 
 impl<K> BinLayout<K>
 where
-    K: BinKey,
+    K: SortKey,
 {
 
     #[inline(always)]
@@ -55,7 +43,7 @@ where
     }
 
     #[inline]
-    pub fn with_keys_max_bins<T>(max_bins_power: u32, array: &[T], key: BinKeyFn<T, K>) -> Option<Self> {
+    pub fn with_keys_max_bins<T>(max_bins_power: u32, array: &[T], key: SortKeyFn<T, K>) -> Option<Self> {
         if array.is_empty() {
             return None;
         }
@@ -93,7 +81,7 @@ impl Log2 for usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::sort::layout::BinLayout;
+    use crate::sort::bin_layout::BinLayout;
 
     #[test]
     fn test_0() {

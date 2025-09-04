@@ -1,35 +1,55 @@
-use crate::sort::layout::{BinKey, BinKeyFn, BinLayout};
-use rayon::iter::ParallelIterator;
-use rayon::slice::ParallelSliceMut;
+use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::mid_layout::MidLayout;
+use crate::sort::parallel::partition::Partition;
+use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
-impl<K: BinKey> BinLayout<K> {
-    pub fn par_sort_by_two_bin_keys<T: Copy + Send>(&self, slice: &mut [T], key1: BinKeyFn<T, K>, key2: BinKeyFn<T, K>)
-    {
-        let mut buffer: Vec<T> = Vec::with_capacity(slice.len());
-        unsafe {
-            buffer.set_len(slice.len());
-        }
-        self.par_sort_by_two_bin_keys_and_buffer(slice, &mut buffer, key1, key2);
-    }
+const MIN_LEN_PER_TASK: usize = 256_000;
 
-    pub fn par_sort_by_two_bin_keys_and_buffer<T: Copy + Send>(
+impl<K: SortKey> MidLayout<K> {
+    pub fn par_sort_by_two_bin_keys<T: Copy + Send>(
         &self,
         slice: &mut [T],
-        buffer: &mut [T],
-        key1: BinKeyFn<T, K>,
-        key2: BinKeyFn<T, K>
+        key1: SortKeyFn<T, K>,
+        key2: SortKeyFn<T, K>,
     ) {
-        debug_assert_eq!(slice.len(), buffer.len());
-
-        let mapper = self.spread_with_buffer(slice, buffer, key1);
-
-        if mapper.is_final() {
+        let (left_layout, right_layout) = if let Some((left, right)) = self.children_layout() {
+            (left, right)
+        } else {
+            slice.sort_by_two_bin_keys(key1, key2);
             return;
+        };
+
+        let (lo, hi) = slice.partition3_by_mid(self.mid_key(), key1);
+
+        let (left_slice, slice) = slice.split_at_mut(lo);
+        let (middle, right_slice) = slice.split_at_mut(hi - lo);
+
+        if !middle.is_empty() {
+            // middle is single key only
+            middle.sort_by_one_bin_key(key2);
         }
 
-        slice
-            .par_chunk_by_mut(|v0, v1| key1(v0) == key1(v1))
-            .for_each(|s| s.sort_by_two_bin_keys(key1, key2));
+        let is_left_big = left_slice.len() > MIN_LEN_PER_TASK;
+        let is_right_big = right_slice.len() > MIN_LEN_PER_TASK;
+
+        if is_left_big && is_right_big {
+            rayon::join(
+                || left_layout.par_sort_by_two_bin_keys(left_slice, key1, key2),
+                || right_layout.par_sort_by_two_bin_keys(right_slice, key1, key2),
+            );
+        } else {
+            if is_left_big {
+                left_layout.par_sort_by_two_bin_keys(left_slice, key1, key2)
+            } else {
+                left_slice.sort_by_two_bin_keys(key1, key2);
+            }
+
+            if is_right_big {
+                right_layout.par_sort_by_two_bin_keys(right_slice, key1, key2)
+            } else {
+                right_slice.sort_by_two_bin_keys(key1, key2);
+            }
+        }
     }
 }

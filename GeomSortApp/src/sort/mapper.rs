@@ -1,5 +1,5 @@
 use std::ops::Range;
-use crate::sort::layout::MAX_BINS_COUNT;
+use crate::sort::bin_layout::MAX_BINS_COUNT;
 
 #[derive(Debug, Clone, Copy, Default)]
 struct Chunk {
@@ -78,19 +78,6 @@ impl Mapper {
         ChunkRanges {
             iter: self.chunks.iter(),
         }
-    }
-
-    #[inline(always)]
-    pub(super) fn into_ranges(self) -> Vec<Range<usize>> {
-        let mut ranges = Vec::with_capacity(self.chunks.len());
-        for chunk in self.chunks {
-            if chunk.count > 1 {
-                let end = chunk.index;
-                let start = end - chunk.count;
-                ranges.push(start..end);
-            }
-        }
-        ranges
     }
 }
 
