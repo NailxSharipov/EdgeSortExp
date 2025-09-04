@@ -1,13 +1,10 @@
-use crate::sort::layout::{BinKey, BinLayout};
+use crate::sort::layout::{BinKey, BinKeyFn, BinLayout};
 use rayon::iter::ParallelIterator;
 use rayon::slice::ParallelSliceMut;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
 impl<K: BinKey> BinLayout<K> {
-    pub fn par_sort_by_two_bin_keys<T: Copy + Send, KeyFn1, KeyFn2>(&self, slice: &mut [T], key1: &KeyFn1, key2: &KeyFn2)
-    where
-        KeyFn1: Fn(&T) -> K + Sync,
-        KeyFn2: Fn(&T) -> K + Sync,
+    pub fn par_sort_by_two_bin_keys<T: Copy + Send>(&self, slice: &mut [T], key1: BinKeyFn<T, K>, key2: BinKeyFn<T, K>)
     {
         let mut buffer: Vec<T> = Vec::with_capacity(slice.len());
         unsafe {
@@ -16,16 +13,13 @@ impl<K: BinKey> BinLayout<K> {
         self.par_sort_by_two_bin_keys_and_buffer(slice, &mut buffer, key1, key2);
     }
 
-    pub fn par_sort_by_two_bin_keys_and_buffer<T: Copy + Send, KeyFn1, KeyFn2>(
+    pub fn par_sort_by_two_bin_keys_and_buffer<T: Copy + Send>(
         &self,
         slice: &mut [T],
         buffer: &mut [T],
-        key1: &KeyFn1,
-        key2: &KeyFn2
-    ) where
-        KeyFn1: Fn(&T) -> K + Sync,
-        KeyFn2: Fn(&T) -> K + Sync,
-    {
+        key1: BinKeyFn<T, K>,
+        key2: BinKeyFn<T, K>
+    ) {
         debug_assert_eq!(slice.len(), buffer.len());
 
         let mapper = self.spread_with_buffer(slice, buffer, key1);

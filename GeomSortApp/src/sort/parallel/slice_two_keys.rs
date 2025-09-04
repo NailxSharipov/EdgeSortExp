@@ -1,34 +1,20 @@
-use crate::sort::layout::{BinKey, BinLayout};
-use crate::sort::parallel::cpu_count::CpuCount;
+use crate::sort::layout::{BinKey, BinKeyFn, BinLayout, MIN_BINS_POWER};
 use crate::sort::parallel::slice_one_key::OneKeyBinSortParallel;
 
 pub trait TwoKeysBinSortParallel<T> {
-    fn par_sort_by_two_bin_keys<K, KeyFn1, KeyFn2>(&mut self, key1: &KeyFn1, key2: &KeyFn2)
-    where
-        K: BinKey,
-        KeyFn1: Fn(&T) -> K + Sync,
-        KeyFn2: Fn(&T) -> K + Sync;
+    fn par_sort_by_two_bin_keys<K: BinKey>(&mut self, key1: BinKeyFn<T, K>, key2: BinKeyFn<T, K>);
 
-    fn par_sort_by_two_bin_keys_and_buffer<K, KeyFn1, KeyFn2>(
+    fn par_sort_by_two_bin_keys_and_buffer<K: BinKey>(
         &mut self,
         buffer: &mut [T],
-        key1: &KeyFn1,
-        key2: &KeyFn2,
-    ) where
-        K: BinKey,
-        KeyFn1: Fn(&T) -> K + Sync,
-        KeyFn2: Fn(&T) -> K + Sync;
+        key1: BinKeyFn<T, K>,
+        key2: BinKeyFn<T, K>,
+    );
 }
 
 impl<T: Copy + Send> TwoKeysBinSortParallel<T> for [T] {
-    fn par_sort_by_two_bin_keys<K, KeyFn1, KeyFn2>(&mut self, key1: &KeyFn1, key2: &KeyFn2)
-    where
-        K: BinKey,
-        KeyFn1: Fn(&T) -> K + Sync,
-        KeyFn2: Fn(&T) -> K + Sync,
-    {
-        let max_bin_power = CpuCount::max_bin_power();
-        let layout = if let Some(layout) = BinLayout::with_keys_max_bins(max_bin_power, self, key1) {
+    fn par_sort_by_two_bin_keys<K: BinKey>(&mut self, key1: BinKeyFn<T, K>, key2: BinKeyFn<T, K>) {
+        let layout = if let Some(layout) = BinLayout::with_keys_max_bins(MIN_BINS_POWER, self, key1) {
             layout
         } else {
             // already sorted by key1
@@ -39,18 +25,13 @@ impl<T: Copy + Send> TwoKeysBinSortParallel<T> for [T] {
         layout.par_sort_by_two_bin_keys(self, key1, key2);
     }
 
-    fn par_sort_by_two_bin_keys_and_buffer<K, KeyFn1, KeyFn2>(
+    fn par_sort_by_two_bin_keys_and_buffer<K: BinKey>(
         &mut self,
         buffer: &mut [T],
-        key1: &KeyFn1,
-        key2: &KeyFn2,
-    ) where
-        K: BinKey,
-        KeyFn1: Fn(&T) -> K + Sync,
-        KeyFn2: Fn(&T) -> K + Sync,
-    {
-        let max_bin_power = CpuCount::max_bin_power();
-        let layout = if let Some(layout) = BinLayout::with_keys_max_bins(max_bin_power, self, key1) {
+        key1: BinKeyFn<T, K>,
+        key2: BinKeyFn<T, K>,
+    ) {
+        let layout = if let Some(layout) = BinLayout::with_keys_max_bins(MIN_BINS_POWER, self, key1) {
             layout
         } else {
             // already sorted by key1

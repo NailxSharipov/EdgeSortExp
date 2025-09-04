@@ -1,18 +1,11 @@
-pub(super) struct CpuCount;
+pub(super) struct CPUCount;
 
-impl CpuCount {
-
+impl CPUCount {
     #[inline]
-    fn count() -> usize {
+    pub(super) fn count() -> usize {
         match std::thread::available_parallelism() {
             Ok(value) => value.get(),
             Err(_) => 1,
         }
-    }
-
-    #[inline]
-    pub(super) fn max_bin_power() -> u32 {
-        let n = Self::count();
-        (2 * n).ilog2()
     }
 }

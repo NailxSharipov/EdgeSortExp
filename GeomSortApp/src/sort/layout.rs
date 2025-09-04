@@ -1,3 +1,7 @@
+use crate::sort::min_max::MinMax;
+
+pub type BinKeyFn<T, K> = fn(&T) -> K;
+
 pub trait BinKey: Copy + Ord {
     fn difference(self, other: Self) -> usize;
 }
@@ -15,7 +19,8 @@ pub struct BinLayout<K> {
     pub(crate) power: usize,
 }
 
-pub const MAX_BINS_POWER: u32 = 6;
+pub const MAX_BINS_POWER: u32 = 8;
+pub const MIN_BINS_POWER: u32 = 6;
 pub const MAX_BINS_COUNT: usize = 1 << MAX_BINS_POWER;
 
 impl<K> BinLayout<K>
@@ -50,21 +55,12 @@ where
     }
 
     #[inline]
-    pub fn with_keys_max_bins<T, KeyFn>(max_bins_power: u32, array: &[T], key: &KeyFn) -> Option<Self>
-    where
-        KeyFn: Fn(&T) -> K,
-    {
-        let first_val = array.first()?;
-        let first_key = key(first_val);
-
-        let mut min_key = first_key;
-        let mut max_key = first_key;
-
-        for val in array.iter().skip(1) {
-            let k = key(val);
-            min_key = min_key.min(k);
-            max_key = max_key.max(k);
+    pub fn with_keys_max_bins<T>(max_bins_power: u32, array: &[T], key: BinKeyFn<T, K>) -> Option<Self> {
+        if array.is_empty() {
+            return None;
         }
+
+        let (min_key, max_key) = array.min_max(key);
 
         if min_key == max_key {
             return None;
@@ -75,10 +71,7 @@ where
 
 
     #[inline]
-    pub fn with_keys<T, KeyFn>(array: &[T], key: &KeyFn) -> Option<Self>
-    where
-        KeyFn: Fn(&T) -> K,
-    {
+    pub fn with_keys<T>(array: &[T], key: fn(&T) -> K) -> Option<Self> {
         Self::with_keys_max_bins(MAX_BINS_POWER, array, key)
     }
 }

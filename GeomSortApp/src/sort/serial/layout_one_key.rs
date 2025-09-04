@@ -1,21 +1,15 @@
-use crate::sort::layout::{BinLayout, BinKey};
+use crate::sort::layout::{BinLayout, BinKey, BinKeyFn};
 use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 
 impl<K: BinKey> BinLayout<K> {
 
-    pub fn sort_by_one_bin_key<T: Copy, KeyFn>(&self, slice: &mut [T], key: &KeyFn)
-    where
-        KeyFn: Fn(&T) -> K,
-    {
+    pub fn sort_by_one_bin_key<T: Copy>(&self, slice: &mut [T], key: BinKeyFn<T, K>) {
         let mut buffer: Vec<T> = Vec::with_capacity(slice.len());
         unsafe { buffer.set_len(slice.len()); }
         self.sort_by_one_bin_key_and_buffer(slice, &mut buffer, key);
     }
 
-    pub fn sort_by_one_bin_key_and_buffer<T: Copy, KeyFn>(&self, slice: &mut [T], buffer: &mut [T], key: &KeyFn)
-    where
-        KeyFn: Fn(&T) -> K,
-    {
+    pub fn sort_by_one_bin_key_and_buffer<T: Copy>(&self, slice: &mut [T], buffer: &mut [T], key: BinKeyFn<T, K>) {
         debug_assert_eq!(slice.len(), buffer.len());
 
         let mapper = self.spread_with_buffer(slice, buffer, key);

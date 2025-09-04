@@ -1,23 +1,15 @@
-use crate::sort::layout::{BinLayout, BinKey};
+use crate::sort::layout::{BinLayout, BinKey, BinKeyFn};
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
 impl<K: BinKey> BinLayout<K> {
 
-    pub fn sort_by_two_bin_keys<T: Copy, KeyFn1, KeyFn2>(&self, slice: &mut [T], key1: &KeyFn1, key2: &KeyFn2)
-    where
-        KeyFn1: Fn(&T) -> K,
-        KeyFn2: Fn(&T) -> K,
-    {
+    pub fn sort_by_two_bin_keys<T: Copy>(&self, slice: &mut [T], key1: BinKeyFn<T, K>, key2: BinKeyFn<T, K>) {
         let mut buffer: Vec<T> = Vec::with_capacity(slice.len());
         unsafe { buffer.set_len(slice.len()); }
         self.sort_by_two_bin_keys_and_buffer(slice, &mut buffer, key1, key2);
     }
 
-    pub fn sort_by_two_bin_keys_and_buffer<T: Copy, KeyFn1, KeyFn2>(&self, slice: &mut [T], buffer: &mut [T], key1: &KeyFn1, key2: &KeyFn2)
-    where
-        KeyFn1: Fn(&T) -> K,
-        KeyFn2: Fn(&T) -> K,
-    {
+    pub fn sort_by_two_bin_keys_and_buffer<T: Copy>(&self, slice: &mut [T], buffer: &mut [T], key1: BinKeyFn<T, K>, key2: BinKeyFn<T, K>) {
         debug_assert_eq!(slice.len(), buffer.len());
 
         let mapper = self.spread_with_buffer(slice, buffer, key1);
