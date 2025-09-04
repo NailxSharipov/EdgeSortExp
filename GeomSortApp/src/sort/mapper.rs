@@ -15,11 +15,6 @@ pub struct Mapper {
 impl Mapper {
 
     #[inline(always)]
-    pub(super) fn is_final(&self) -> bool {
-        self.count * 2 <= MAX_BINS_COUNT
-    }
-
-    #[inline(always)]
     pub(super) fn new(count: usize) -> Self {
         debug_assert!(count <= MAX_BINS_COUNT);
         Self {
@@ -43,12 +38,22 @@ impl Mapper {
     }
 
     #[inline(always)]
-    pub(super) fn init_indices(&mut self, max_count: usize) {
+    pub(super) fn init_indices(&mut self) {
         let mut offset = 0;
         for chunk in self.chunks.iter_mut() {
             chunk.index = offset;
             offset += chunk.count;
         }
+    }
+
+    #[inline]
+    pub(crate) fn to_ends(&self) -> Vec<usize> {
+        debug_assert!(self.chunks.len().is_power_of_two());
+        let mut result = Vec::with_capacity(self.count);
+        for ch in self.chunks[..self.count].iter() {
+            result.push(ch.index);
+        }
+        result
     }
 }
 

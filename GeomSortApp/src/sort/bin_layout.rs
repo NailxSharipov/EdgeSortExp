@@ -15,7 +15,6 @@ impl<K> BinLayout<K>
 where
     K: SortKey,
 {
-
     #[inline(always)]
     pub fn index(&self, value: K) -> usize {
         let offset = value.difference(self.min_key);
@@ -43,7 +42,11 @@ where
     }
 
     #[inline]
-    pub fn with_keys_max_bins<T>(max_bins_power: u32, array: &[T], key: SortKeyFn<T, K>) -> Option<Self> {
+    pub fn with_keys_and_cpu<T>(
+        array: &[T],
+        key: SortKeyFn<T, K>,
+        cpu: usize,
+    ) -> Option<Self> {
         if array.is_empty() {
             return None;
         }
@@ -54,13 +57,18 @@ where
             return None;
         }
 
-        Some(Self::new(min_key, max_key, max_bins_power))
-    }
+        let possible_by_cpu = if cpu > 1 {
+            (4 * cpu - 1).ilog2()
+        } else {
+            MAX_BINS_POWER
+        };
 
+        Some(Self::new(min_key, max_key, possible_by_cpu))
+    }
 
     #[inline]
     pub fn with_keys<T>(array: &[T], key: fn(&T) -> K) -> Option<Self> {
-        Self::with_keys_max_bins(MAX_BINS_POWER, array, key)
+        Self::with_keys_and_cpu(array, key, 0)
     }
 }
 

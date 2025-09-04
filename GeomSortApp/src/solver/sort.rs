@@ -47,7 +47,7 @@ impl SortSolution {
         let start = Instant::now();
 
         let mut data = segments.to_vec();
-        data.sort_by_two_bin_keys(|s| s.start().x, |s| s.start().y);
+        data.sort_by_two_keys(|s| s.start().x, |s| s.start().y);
 
         Self::print_result("bin_sort", data.last().unwrap().end().x, start);
     }
@@ -56,7 +56,7 @@ impl SortSolution {
         let start = Instant::now();
 
         let mut data = segments.to_vec();
-        data.par_sort_by_two_bin_keys(|s| s.start().x, |s| s.start().y);
+        data.par_sort_by_two_keys(|s| s.start().x, |s| s.start().y);
 
         Self::print_result("par bin_sort", data.last().unwrap().end().x, start);
     }
