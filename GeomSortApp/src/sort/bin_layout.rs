@@ -5,6 +5,7 @@ pub struct BinLayout<K> {
     pub(crate) min_key: K,
     pub(crate) max_key: K,
     pub(crate) power: usize,
+    one_to_one: bool,
 }
 
 pub const MAX_BINS_POWER: u32 = 8;
@@ -15,6 +16,10 @@ impl<K> BinLayout<K>
 where
     K: SortKey,
 {
+    #[inline(always)]
+    pub(super) fn one_to_one(&self) -> bool {
+        self.one_to_one
+    }
 
     #[inline(always)]
     pub fn index(&self, value: K) -> usize {
@@ -28,22 +33,30 @@ where
     }
 
     #[inline(always)]
-    pub fn new(min_key: K, max_key: K, max_bins_power: u32) -> BinLayout<K> {
-        let length = max_key.difference(min_key) + 1;
-        let scale = length.ilog2_ceil();
-        let sub_power = max_bins_power.min(MAX_BINS_POWER);
+    fn new(min_key: K, max_key: K) -> BinLayout<K> {
+        let length = max_key.difference(min_key);
+        if length < MAX_BINS_COUNT {
+            return Self {
+                min_key,
+                max_key,
+                power: 0,
+                one_to_one: true,
+            };
+        }
 
-        let power = scale.saturating_sub(sub_power) as usize;
+        let scale = (length + 1).ilog2_ceil();
+        let power = scale.saturating_sub(MAX_BINS_POWER) as usize;
 
         Self {
             min_key,
             max_key,
             power,
+            one_to_one: false,
         }
     }
 
     #[inline]
-    pub fn with_keys_max_bins<T>(max_bins_power: u32, array: &[T], key: SortKeyFn<T, K>) -> Option<Self> {
+    pub fn with_keys<T>(array: &[T], key: SortKeyFn<T, K>) -> Option<Self> {
         if array.is_empty() {
             return None;
         }
@@ -54,13 +67,7 @@ where
             return None;
         }
 
-        Some(Self::new(min_key, max_key, max_bins_power))
-    }
-
-
-    #[inline]
-    pub fn with_keys<T>(array: &[T], key: fn(&T) -> K) -> Option<Self> {
-        Self::with_keys_max_bins(MAX_BINS_POWER, array, key)
+        Some(Self::new(min_key, max_key))
     }
 }
 
@@ -85,21 +92,20 @@ mod tests {
 
     #[test]
     fn test_0() {
-        let layout = BinLayout::<i32>::new(0i32, 3i32, 8);
-
+        let layout = BinLayout::<i32>::new(0i32, 3i32);
         assert_eq!(layout.power, 0);
     }
 
     #[test]
     fn test_1() {
-        let layout = BinLayout::<i32>::new(0, 255, 8);
+        let layout = BinLayout::<i32>::new(0, 255);
 
         assert_eq!(layout.power, 0);
     }
 
     #[test]
     fn test_2() {
-        let layout = BinLayout::<i32>::new(0, 256, 8);
+        let layout = BinLayout::<i32>::new(0, 256);
 
         assert_eq!(layout.power, 1);
     }

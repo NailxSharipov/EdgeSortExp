@@ -15,12 +15,12 @@ pub struct Mapper {
 impl Mapper {
 
     #[inline(always)]
-    pub(super) fn is_final(&self) -> bool {
-        self.count * 2 <= MAX_BINS_COUNT
+    pub(super) fn count(&self) -> usize {
+        self.count
     }
 
     #[inline(always)]
-    pub(super) fn new(count: usize) -> Self {
+    pub(crate) fn new(count: usize) -> Self {
         debug_assert!(count <= MAX_BINS_COUNT);
         Self {
             count,

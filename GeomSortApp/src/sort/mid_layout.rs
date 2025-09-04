@@ -55,7 +55,7 @@ where
             return None;
         }
 
-        let possible_by_cpu = (2 * cpu - 1).ilog2();
+        let possible_by_cpu = cpu.ilog2() + 2;
         let required_by_bins = span.ilog2().saturating_sub(MIN_BINS_POWER);
         let level = required_by_bins.min(possible_by_cpu);
 

@@ -7,7 +7,7 @@ use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 const MIN_LEN_PER_TASK: usize = 256_000;
 
 impl<K: SortKey> MidLayout<K> {
-    pub fn par_sort_by_two_bin_keys<T: Copy + Send>(
+    pub fn par_sort_by_two_keys<T: Copy + Send>(
         &self,
         slice: &mut [T],
         key1: SortKeyFn<T, K>,
@@ -16,7 +16,7 @@ impl<K: SortKey> MidLayout<K> {
         let (left_layout, right_layout) = if let Some((left, right)) = self.children_layout() {
             (left, right)
         } else {
-            slice.sort_by_two_bin_keys(key1, key2);
+            slice.sort_by_two_keys(key1, key2);
             return;
         };
 
@@ -27,7 +27,7 @@ impl<K: SortKey> MidLayout<K> {
 
         if !middle.is_empty() {
             // middle is single key only
-            middle.sort_by_one_bin_key(key2);
+            middle.sort_by_one_key(key2);
         }
 
         let is_left_big = left_slice.len() > MIN_LEN_PER_TASK;
@@ -35,20 +35,20 @@ impl<K: SortKey> MidLayout<K> {
 
         if is_left_big && is_right_big {
             rayon::join(
-                || left_layout.par_sort_by_two_bin_keys(left_slice, key1, key2),
-                || right_layout.par_sort_by_two_bin_keys(right_slice, key1, key2),
+                || left_layout.par_sort_by_two_keys(left_slice, key1, key2),
+                || right_layout.par_sort_by_two_keys(right_slice, key1, key2),
             );
         } else {
             if is_left_big {
-                left_layout.par_sort_by_two_bin_keys(left_slice, key1, key2)
+                left_layout.par_sort_by_two_keys(left_slice, key1, key2)
             } else {
-                left_slice.sort_by_two_bin_keys(key1, key2);
+                left_slice.sort_by_two_keys(key1, key2);
             }
 
             if is_right_big {
-                right_layout.par_sort_by_two_bin_keys(right_slice, key1, key2)
+                right_layout.par_sort_by_two_keys(right_slice, key1, key2)
             } else {
-                right_slice.sort_by_two_bin_keys(key1, key2);
+                right_slice.sort_by_two_keys(key1, key2);
             }
         }
     }
