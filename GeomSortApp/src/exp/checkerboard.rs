@@ -57,11 +57,11 @@ impl CheckerboardTest {
     pub fn run_id_segments(&self) {
         println!("Id Segments test n = {}", self.id_segments.len());
         println!();
-        SortSolution::run_segments_sort_stable(&self.id_segments);
-        SortSolution::run_segments_sort_unstable(&self.id_segments);
-        SortSolution::run_segments_par_sort_stable(&self.id_segments);
-        SortSolution::run_segments_par_sort_unstable(&self.id_segments);
-        SortSolution::run_segments_bin_sort(&self.id_segments);
+        // SortSolution::run_segments_sort_stable(&self.id_segments);
+        // SortSolution::run_segments_sort_unstable(&self.id_segments);
+        // SortSolution::run_segments_par_sort_stable(&self.id_segments);
+        // SortSolution::run_segments_par_sort_unstable(&self.id_segments);
+        // SortSolution::run_segments_bin_sort(&self.id_segments);
         SortSolution::run_segments_par_bin_sort(&self.id_segments);
     }
 

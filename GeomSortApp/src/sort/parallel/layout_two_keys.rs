@@ -3,7 +3,7 @@ use crate::sort::key::{SortKey, SortKeyFn};
 use crate::sort::parallel::slice_two_keys::TwoKeysBinSortParallel;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
-const MIN_LEN_PER_TASK: usize = 256_000;
+const MIN_LEN_PER_TASK: usize = 64_000;
 
 impl<K: SortKey> BinLayout<K> {
     pub fn par_sort_by_two_keys<T: Copy + Send>(
@@ -28,9 +28,6 @@ impl<K: SortKey> BinLayout<K> {
     ) {
         debug_assert_eq!(slice.len(), buffer.len());
         let mapper = self.spread_with_buffer(slice, buffer, key1);
-        if self.power == 0 {
-            return;
-        }
 
         let mut ends = mapper.to_ends();
 
@@ -49,7 +46,7 @@ impl<K: SortKey> BinLayout<K> {
             return
         }
 
-        let mid = (ends.len() / 2) - 1;
+        let mid = ends.len() / 2;
         let mid_end = ends[mid] - base;
         let (left_slice, right_slice) = slice.split_at_mut(mid_end);
 

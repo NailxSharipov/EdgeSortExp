@@ -14,9 +14,6 @@ impl<K: SortKey> BinLayout<K> {
         debug_assert_eq!(slice.len(), buffer.len());
 
         let mapper = self.spread_with_buffer(slice, buffer, key);
-        if self.power == 0 {
-            return;
-        }
 
         for range in mapper.iter_ranges() {
             if range.len() < 2 { continue; }

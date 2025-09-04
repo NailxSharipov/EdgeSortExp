@@ -51,6 +51,9 @@ impl Mapper {
         debug_assert!(self.chunks.len().is_power_of_two());
         let mut result = Vec::with_capacity(self.count);
         for ch in self.chunks[..self.count].iter() {
+            if ch.count == 0 {
+                continue;
+            }
             result.push(ch.index);
         }
         result

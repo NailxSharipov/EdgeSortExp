@@ -27,12 +27,11 @@ where
     }
 
     #[inline(always)]
-    pub fn new(min_key: K, max_key: K, max_bins_power: u32) -> BinLayout<K> {
+    fn new(min_key: K, max_key: K, max_bins_power: u32) -> BinLayout<K> {
         let length = max_key.difference(min_key) + 1;
         let scale = length.ilog2_ceil();
-        let sub_power = max_bins_power.min(MAX_BINS_POWER);
 
-        let power = scale.saturating_sub(sub_power) as usize;
+        let power = scale.saturating_sub(max_bins_power) as usize;
 
         Self {
             min_key,
@@ -63,7 +62,10 @@ where
             MAX_BINS_POWER
         };
 
-        Some(Self::new(min_key, max_key, possible_by_cpu))
+        let possible_by_count = array.len().ilog2_ceil();
+        let possible = possible_by_count.min(possible_by_cpu);
+
+        Some(Self::new(min_key, max_key, possible))
     }
 
     #[inline]
