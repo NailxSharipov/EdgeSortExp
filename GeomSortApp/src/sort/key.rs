@@ -1,4 +1,9 @@
-pub type SortKeyFn<T, K> = fn(&T) -> K;
+pub trait KeyFn<T, K>: Fn(&T) -> K + Send + Sync + Copy {
+
+}
+impl<T, K, F: Fn(&T) -> K + Send + Sync + Copy> KeyFn<T, K> for F {
+
+}
 
 pub trait SortKey: Copy + Ord + Sync {
     fn difference(self, other: Self) -> usize;

@@ -1,13 +1,13 @@
 use std::ptr;
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 
 pub(super) trait Partition<T> {
-    fn partition<K: SortKey>(&mut self, mid_key: K, key: SortKeyFn<T, K>) -> usize;
+    fn partition<K: SortKey, F: KeyFn<T, K>>(&mut self, mid_key: K, key: F) -> usize;
 }
 
 impl<T> Partition<T> for [T] {
     #[inline(always)]
-    fn partition<K: SortKey>(&mut self, mid_key: K, key: SortKeyFn<T, K>) -> usize {
+    fn partition<K: SortKey, F: KeyFn<T, K>>(&mut self, mid_key: K, key: F) -> usize {
         let len = self.len();
         let mut i = 0usize;
         let mut j = len; // exclusive

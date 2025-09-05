@@ -1,4 +1,4 @@
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 use crate::sort::min_max::MinMax;
 
 pub struct BinLayout<K> {
@@ -55,8 +55,8 @@ where
         }
     }
 
-    #[inline]
-    pub fn with_keys<T>(array: &[T], key: SortKeyFn<T, K>) -> Option<Self> {
+    #[inline(always)]
+    pub fn with_keys<T, F: KeyFn<T, K>>(array: &[T], key: F) -> Option<Self> {
         if array.is_empty() {
             return None;
         }
@@ -76,6 +76,7 @@ trait Log2 {
 }
 
 impl Log2 for usize {
+    #[inline(always)]
     fn ilog2_ceil(&self) -> u32 {
         let floor = self.ilog2();
         if self.is_power_of_two() {

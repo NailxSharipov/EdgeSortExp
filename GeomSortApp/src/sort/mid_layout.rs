@@ -1,5 +1,5 @@
 use crate::sort::bin_layout::MIN_BINS_POWER;
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 use crate::sort::min_max::MinMax;
 
 pub(crate) struct MidLayout<K> {
@@ -42,8 +42,8 @@ where
         Some((left, right))
     }
 
-    #[inline]
-    pub(crate) fn with_keys<T>(array: &[T], key: SortKeyFn<T, K>, cpu: usize) -> Option<Self> {
+    #[inline(always)]
+    pub(crate) fn with_keys<T, F: KeyFn<T, K>>(array: &[T], key: F, cpu: usize) -> Option<Self> {
         if array.is_empty() || cpu == 1 {
             return None;
         }

@@ -1,16 +1,16 @@
 use std::cmp::Ordering;
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 use crate::sort::mapper::Mapper;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
 impl Mapper {
     #[inline]
-    pub(crate) fn sort_chunks_by_two_keys<K: SortKey, T: Copy>(
+    pub(crate) fn sort_chunks_by_two_keys<K: SortKey, T: Copy, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &self,
         slice: &mut [T],
         buffer: &mut [T],
-        key1: SortKeyFn<T, K>,
-        key2: SortKeyFn<T, K>,
+        key1: F1,
+        key2: F2,
     ) {
         for chunk in self.chunks[..self.count].iter() {
             match chunk.count {

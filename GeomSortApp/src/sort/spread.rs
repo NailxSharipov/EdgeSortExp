@@ -1,11 +1,15 @@
-use crate::sort::key::{SortKey, SortKeyFn};
 use crate::sort::bin_layout::BinLayout;
+use crate::sort::key::{KeyFn, SortKey};
 use crate::sort::mapper::Mapper;
 
 impl<K: SortKey> BinLayout<K> {
-
-    pub(crate) fn spread_with_buffer<T: Copy>(&self, slice: &mut [T], buffer: &mut [T], key: SortKeyFn<T, K>) -> Mapper {
-
+    #[inline(always)]
+    pub(crate) fn spread_with_buffer<T: Copy, F: KeyFn<T, K>>(
+        &self,
+        slice: &mut [T],
+        buffer: &mut [T],
+        key: F,
+    ) -> Mapper {
         let mut mapper = Mapper::new(self.count());
         for a in slice.iter() {
             mapper.inc_bin_count(self.index(key(a)));

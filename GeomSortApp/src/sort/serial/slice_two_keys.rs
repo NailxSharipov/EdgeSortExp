@@ -1,20 +1,20 @@
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 use crate::sort::bin_layout::BinLayout;
 use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 
 pub trait TwoKeysBinSortSerial<T> {
-    fn sort_by_two_keys<K: SortKey>(&mut self, key1: SortKeyFn<T, K>, key2: SortKeyFn<T, K>);
+    fn sort_by_two_keys<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(&mut self, key1: F1, key2: F2);
 
-    fn sort_by_two_keys_and_buffer<K: SortKey>(
+    fn sort_by_two_keys_and_buffer<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &mut self,
         buffer: &mut [T],
-        key1: SortKeyFn<T, K>,
-        key2: SortKeyFn<T, K>,
+        key1: F1,
+        key2: F2,
     );
 }
 
 impl<T: Copy> TwoKeysBinSortSerial<T> for [T] {
-    fn sort_by_two_keys<K: SortKey>(&mut self, key1: SortKeyFn<T, K>, key2: SortKeyFn<T, K>) {
+    fn sort_by_two_keys<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(&mut self, key1: F1, key2: F2) {
         if let Some(layout) = BinLayout::with_keys(self, key1) {
             layout.sort_by_two_keys(self, key1, key2);
         } else {
@@ -23,11 +23,11 @@ impl<T: Copy> TwoKeysBinSortSerial<T> for [T] {
         };
     }
 
-    fn sort_by_two_keys_and_buffer<K: SortKey>(
+    fn sort_by_two_keys_and_buffer<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &mut self,
         buffer: &mut [T],
-        key1: SortKeyFn<T, K>,
-        key2: SortKeyFn<T, K>,
+        key1: F1,
+        key2: F2,
     ) {
         if let Some(layout) = BinLayout::with_keys(self, key1) {
             layout.sort_by_two_keys_and_buffer(self, buffer, key1, key2);

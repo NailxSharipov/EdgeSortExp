@@ -1,12 +1,13 @@
 use crate::sort::bin_layout::BinLayout;
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 
 impl<K: SortKey> BinLayout<K> {
-    pub fn sort_by_two_keys<T: Copy>(
+    #[inline]
+    pub fn sort_by_two_keys<T: Copy, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &self,
         slice: &mut [T],
-        key1: SortKeyFn<T, K>,
-        key2: SortKeyFn<T, K>,
+        key1: F1,
+        key2: F2,
     ) {
         let mut buffer: Vec<T> = Vec::with_capacity(slice.len());
         unsafe {
@@ -15,12 +16,13 @@ impl<K: SortKey> BinLayout<K> {
         self.sort_by_two_keys_and_buffer(slice, &mut buffer, key1, key2);
     }
 
-    pub fn sort_by_two_keys_and_buffer<T: Copy>(
+    #[inline]
+    pub fn sort_by_two_keys_and_buffer<T: Copy, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &self,
         slice: &mut [T],
         buffer: &mut [T],
-        key1: SortKeyFn<T, K>,
-        key2: SortKeyFn<T, K>,
+        key1: F1,
+        key2: F2,
     ) {
         debug_assert_eq!(slice.len(), buffer.len());
 

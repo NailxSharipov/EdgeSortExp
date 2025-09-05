@@ -1,14 +1,14 @@
-use crate::sort::key::{SortKey, SortKeyFn};
+use crate::sort::key::{KeyFn, SortKey};
 use crate::sort::mapper::Mapper;
 use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 
 impl Mapper {
     #[inline]
-    pub(crate) fn sort_chunks_by_one_key<K: SortKey, T: Copy>(
+    pub(crate) fn sort_chunks_by_one_key<K: SortKey, T: Copy, F: KeyFn<T, K>>(
         &self,
         slice: &mut [T],
         buffer: &mut [T],
-        key: SortKeyFn<T, K>,
+        key: F,
     ) {
         for chunk in self.chunks[..self.count].iter() {
             match chunk.count {
