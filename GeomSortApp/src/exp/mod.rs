@@ -1,2 +1,2 @@
 pub mod checkerboard;
-mod random;
+pub mod random;

@@ -14,7 +14,7 @@ pub struct RandomTest {
 impl RandomTest {
 
     pub fn new(n: usize) -> Self {
-        let segments = Self::checkerboard_segments(20, 30, n);
+        let segments = Self::random_segments(n, -1000_000, 1000_000, 10_000);
         let index_segments: Vec<_> = segments.iter().enumerate().map(|(i, s)|IndexSegment::new(i, s)).collect();
         let id_segments: Vec<_> = segments.iter().enumerate().map(|(i, s)|IdSegment::new(i, s)).collect();
         Self {
@@ -25,7 +25,7 @@ impl RandomTest {
     }
 
     pub fn run_all(&self) {
-        println!("Checkerboard");
+        println!("Random");
         self.run_segments();
         println!();
         self.run_index_segments();
@@ -41,6 +41,8 @@ impl RandomTest {
         SortSolution::run_segments_par_sort_stable(&self.segments);
         SortSolution::run_segments_par_sort_unstable(&self.segments);
         SortSolution::run_segments_bin_sort(&self.segments);
+        SortSolution::run_segments_par_bin_sort(&self.segments);
+        SortSolution::run_compare(&self.segments);
     }
 
     pub fn run_index_segments(&self) {
@@ -51,6 +53,7 @@ impl RandomTest {
         SortSolution::run_segments_par_sort_stable(&self.index_segments);
         SortSolution::run_segments_par_sort_unstable(&self.index_segments);
         SortSolution::run_segments_bin_sort(&self.index_segments);
+        SortSolution::run_segments_par_bin_sort(&self.segments);
     }
 
     pub fn run_id_segments(&self) {
@@ -61,36 +64,7 @@ impl RandomTest {
         SortSolution::run_segments_par_sort_stable(&self.id_segments);
         SortSolution::run_segments_par_sort_unstable(&self.id_segments);
         SortSolution::run_segments_bin_sort(&self.id_segments);
-    }
-
-    fn checkerboard_segments(size: i32, offset: i32, n: usize) -> Vec<Segment> {
-        let mut vec = Vec::with_capacity(n * n);
-        let start = Point::new(0, 0);
-        let mut y = start.y;
-        for _ in 0..n {
-            let mut x = start.x;
-            for _ in 0..n {
-                let p0 = Point::new(x, y);
-                let p1 = Point::new(x, y + size);
-                let p2 = Point::new(x + size, y + size);
-                let p3 = Point::new(x + size, y);
-
-                let s0 = Segment::new(p0, p1);
-                let s1 = Segment::new(p1, p2);
-                let s2 = Segment::new(p2, p3);
-                let s3 = Segment::new(p3, p0);
-
-                vec.push(s0);
-                vec.push(s1);
-                vec.push(s2);
-                vec.push(s3);
-
-                x += offset;
-            }
-            y += offset;
-        }
-
-        vec
+        SortSolution::run_segments_par_bin_sort(&self.segments);
     }
 
     fn random_segments(n: usize, min: i32, max: i32, len: i32) -> Vec<Segment> {

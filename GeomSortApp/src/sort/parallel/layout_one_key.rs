@@ -14,10 +14,9 @@ impl<K: SortKey> MidLayout<K> {
             return;
         };
 
-        let (lo, hi) = slice.partition3_by_mid(self.mid_key(), key);
+        let md = slice.partition(self.mid_key(), key);
 
-        let (left_slice, slice) = slice.split_at_mut(lo);
-        let (_, right_slice) = slice.split_at_mut(hi - lo);
+        let (left_slice, right_slice) = slice.split_at_mut(md);
 
         let is_left_big = left_slice.len() > MIN_LEN_PER_TASK;
         let is_right_big = right_slice.len() > MIN_LEN_PER_TASK;

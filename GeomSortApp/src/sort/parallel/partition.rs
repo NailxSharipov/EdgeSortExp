@@ -1,41 +1,56 @@
+use std::ptr;
 use crate::sort::key::{SortKey, SortKeyFn};
-use std::cmp::Ordering;
 
 pub(super) trait Partition<T> {
-    fn partition3_by_mid<K: SortKey>(
-        &mut self,
-        mid_key: K,
-        key: SortKeyFn<T, K>,
-    ) -> (usize, usize);
+    fn partition<K: SortKey>(&mut self, mid_key: K, key: SortKeyFn<T, K>) -> usize;
 }
 
 impl<T> Partition<T> for [T] {
     #[inline(always)]
-    fn partition3_by_mid<K: SortKey>(
-        &mut self,
-        mid_key: K,
-        key: SortKeyFn<T, K>,
-    ) -> (usize, usize) {
-        let (mut lo, mut i, mut hi) = (0, 0, self.len());
-        while i < hi {
-            let k = key(&self[i]);
-            match k.cmp(&mid_key) {
-                Ordering::Less => {
-                    self.swap(lo, i);
-                    lo += 1;
+    fn partition<K: SortKey>(&mut self, mid_key: K, key: SortKeyFn<T, K>) -> usize {
+        let len = self.len();
+        let mut i = 0usize;
+        let mut j = len; // exclusive
+
+        // SAFETY:
+        // - `ptr` points to `self`'s contiguous storage.
+        // - We only form mutable references for indices in-bounds.
+        // - At each swap we ensure distinct indices (i < j), so no aliasing of &mut.
+        // - Loop maintains 0 <= i <= j <= len.
+        let ptr = self.as_mut_ptr();
+        unsafe {
+            while i < j {
+                // advance i while <= mid_key
+                while i < j && key(&*ptr.add(i)) <= mid_key {
                     i += 1;
                 }
-                Ordering::Greater => {
-                    hi -= 1;
-                    self.swap(i, hi);
-                    // i stays; new a[i] must be examined
+                // retreat j while > mid_key
+                while i < j && key(&*ptr.add(j - 1)) > mid_key {
+                    j -= 1;
                 }
-                Ordering::Equal => {
-                    i += 1;
+                if i >= j {
+                    break;
                 }
+                // swap the mismatched pair
+                ptr::swap(ptr.add(i), ptr.add(j - 1));
+                i += 1;
+                j -= 1;
             }
         }
-        // now: [0..lo) < mid, [lo..hi) == mid, [hi..len) > mid
-        (lo, hi)
+
+        j
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::sort::parallel::partition::Partition;
+    #[test]
+    fn test_0() {
+        let mut arr = vec![5, 3, 1];
+
+        let x = arr.partition(2, |&a| a);
+
+        assert_eq!(x, 1);
     }
 }

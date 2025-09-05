@@ -1,6 +1,5 @@
 use crate::sort::bin_layout::BinLayout;
 use crate::sort::key::{SortKey, SortKeyFn};
-use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
 impl<K: SortKey> BinLayout<K> {
     pub fn sort_by_two_keys<T: Copy>(
@@ -28,28 +27,9 @@ impl<K: SortKey> BinLayout<K> {
         let mapper = self.spread_with_buffer(slice, buffer, key1);
 
         if self.one_to_one() {
-            let mut k = key1(&slice[0]);
-            for a in slice.iter() {
-                let ki = key1(a);
-                if ki < k {
-                    dbg!();
-                }
-                k = ki;
-            }
-            return;
-        }
-
-        for range in mapper.iter_ranges() {
-            if range.len() < 2 {
-                continue;
-            }
-            let (sub_slice, sub_buffer) = unsafe {
-                let sub_buffer = buffer.get_unchecked_mut(0..range.len());
-                let sub_slice = slice.get_unchecked_mut(range);
-                (sub_slice, sub_buffer)
-            };
-
-            sub_slice.sort_by_two_keys_and_buffer(sub_buffer, key1, key2);
+            mapper.sort_chunks_by_one_key(slice, buffer, key2);
+        } else {
+            mapper.sort_chunks_by_two_keys(slice, buffer, key1, key2);
         }
     }
 }

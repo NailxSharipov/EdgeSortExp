@@ -1,24 +1,18 @@
-use std::ops::Range;
 use crate::sort::bin_layout::MAX_BINS_COUNT;
+use std::ops::Range;
 
 #[derive(Debug, Clone, Copy, Default)]
-struct Chunk {
-    index: usize,
-    count: usize
+pub(crate) struct Chunk {
+    pub(crate) index: usize,
+    pub(crate) count: usize,
 }
 
 pub struct Mapper {
-    count: usize,
-    chunks: [Chunk; MAX_BINS_COUNT]
+    pub(crate) count: usize,
+    pub(crate) chunks: [Chunk; MAX_BINS_COUNT],
 }
 
 impl Mapper {
-
-    #[inline(always)]
-    pub(super) fn count(&self) -> usize {
-        self.count
-    }
-
     #[inline(always)]
     pub(crate) fn new(count: usize) -> Self {
         debug_assert!(count <= MAX_BINS_COUNT);
@@ -52,33 +46,11 @@ impl Mapper {
     }
 }
 
-pub struct ChunkRanges<'a> {
-    iter: std::slice::Iter<'a, Chunk>,
-}
-
-impl<'a> Iterator for ChunkRanges<'a> {
-    type Item = Range<usize>;
-
+impl Chunk {
     #[inline(always)]
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some(chunk) = self.iter.next() {
-            if chunk.count > 0 {
-                let end = chunk.index;
-                let start = end - chunk.count;
-                return Some(start..end);
-            }
-        }
-        None
+    pub(crate) fn to_range(&self) -> Range<usize> {
+        let end = self.index;
+        let start = end - self.count;
+        start..end
     }
 }
-
-impl Mapper {
-    #[inline(always)]
-    pub(super) fn iter_ranges(&self) -> ChunkRanges<'_> {
-        ChunkRanges {
-            iter: self.chunks.iter(),
-        }
-    }
-}
-
-

@@ -1,8 +1,8 @@
-use crate::sort::parallel::slice_two_keys::TwoKeysBinSortParallel;
-use std::time::Instant;
-use rayon::prelude::ParallelSliceMut;
 use crate::geom::start_segment::StartEnd;
+use crate::sort::parallel::slice_two_keys::TwoKeysBinSortParallel;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
+use rayon::prelude::ParallelSliceMut;
+use std::time::Instant;
 
 pub struct SortSolution;
 
@@ -74,23 +74,24 @@ impl SortSolution {
         data_1.sort_by_two_keys(|s| s.start().x, |s| s.start().y);
         let mut data_2 = segments.to_vec();
         data_2.par_sort_unstable_by(|s0, s1| s0.cmp_by_start(s1));
-        if compare_by_start(&data_0, &data_2) {
-            println!("not validation par sort");
+        if let Some(index) = compare_by_start(&data_1, &data_2) {
+            println!("not valid ser sort index: {}", index);
         }
-        if compare_by_start(&data_1, &data_2) {
-            println!("not validation ser sort");
+        if let Some(index) = compare_by_start(&data_0, &data_2) {
+            println!("not valid par sort index: {}", index);
         }
     }
 }
 
-fn compare_by_start<S: StartEnd>(data_1: &[S], data_2: &[S]) -> bool {
+fn compare_by_start<S: StartEnd>(data_1: &[S], data_2: &[S]) -> Option<usize> {
     if data_1.len() != data_2.len() {
-        return false;
+        return Some(usize::MAX);
     }
-    for (s1, s2) in data_1.iter().zip(data_2.iter()) {
+    for (i, (s1, s2)) in data_1.iter().zip(data_2.iter()).enumerate() {
         if s1.start() != s2.start() {
-            return false;
+            return Some(i);
         }
     }
-    true
+
+    None
 }

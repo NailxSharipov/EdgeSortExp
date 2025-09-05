@@ -1,7 +1,6 @@
 use crate::sort::key::{SortKey, SortKeyFn};
 use crate::sort::mid_layout::MidLayout;
 use crate::sort::parallel::partition::Partition;
-use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
 const MIN_LEN_PER_TASK: usize = 256_000;
@@ -20,15 +19,9 @@ impl<K: SortKey> MidLayout<K> {
             return;
         };
 
-        let (lo, hi) = slice.partition3_by_mid(self.mid_key(), key1);
+        let md = slice.partition(self.mid_key(), key1);
 
-        let (left_slice, slice) = slice.split_at_mut(lo);
-        let (middle, right_slice) = slice.split_at_mut(hi - lo);
-
-        if !middle.is_empty() {
-            // middle is single key only
-            middle.sort_by_one_key(key2);
-        }
+        let (left_slice, right_slice) = slice.split_at_mut(md);
 
         let is_left_big = left_slice.len() > MIN_LEN_PER_TASK;
         let is_right_big = right_slice.len() > MIN_LEN_PER_TASK;
