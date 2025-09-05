@@ -26,21 +26,22 @@ impl CheckerboardTest {
     pub fn run_all(&self) {
         println!("Checkerboard");
         self.run_segments();
-        println!();
-        self.run_index_segments();
-        println!();
-        self.run_id_segments();
+        // println!();
+        // self.run_index_segments();
+        // println!();
+        // self.run_id_segments();
     }
 
     pub fn run_segments(&self) {
         println!("Segments test n = {}", self.segments.len());
         println!();
-        SortSolution::run_segments_sort_stable(&self.segments);
-        SortSolution::run_segments_sort_unstable(&self.segments);
-        SortSolution::run_segments_par_sort_stable(&self.segments);
-        SortSolution::run_segments_par_sort_unstable(&self.segments);
+        // SortSolution::run_segments_sort_stable(&self.segments);
+        // SortSolution::run_segments_sort_unstable(&self.segments);
+        // SortSolution::run_segments_par_sort_stable(&self.segments);
+        // SortSolution::run_segments_par_sort_unstable(&self.segments);
         SortSolution::run_segments_bin_sort(&self.segments);
-        SortSolution::run_segments_par_bin_sort(&self.segments);
+        // SortSolution::run_segments_par_bin_sort(&self.segments);
+        SortSolution::run_compare(&self.segments);
     }
 
     pub fn run_index_segments(&self) {

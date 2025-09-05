@@ -43,9 +43,9 @@ impl Mapper {
     }
 
     #[inline(always)]
-    pub(super) fn init_indices(&mut self, max_count: usize) {
+    pub(super) fn init_indices(&mut self) {
         let mut offset = 0;
-        for chunk in self.chunks.iter_mut() {
+        for chunk in self.chunks[..self.count].iter_mut() {
             chunk.index = offset;
             offset += chunk.count;
         }

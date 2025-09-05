@@ -65,8 +65,32 @@ impl SortSolution {
         let duration = start.elapsed().as_secs_f64();
         println!("{} - {:.6} hash: {}", title, duration, result);
     }
-    //
-    // fn run_test<S: StartEnd + Copy>() {
-    //
-    // }
+
+    pub fn run_compare<S: StartEnd + Copy>(segments: &[S]) {
+        println!("validation start");
+        let mut data_0 = segments.to_vec();
+        data_0.par_sort_by_two_keys(|s| s.start().x, |s| s.start().y);
+        let mut data_1 = segments.to_vec();
+        data_1.sort_by_two_keys(|s| s.start().x, |s| s.start().y);
+        let mut data_2 = segments.to_vec();
+        data_2.par_sort_unstable_by(|s0, s1| s0.cmp_by_start(s1));
+        if compare_by_start(&data_0, &data_2) {
+            println!("not validation par sort");
+        }
+        if compare_by_start(&data_1, &data_2) {
+            println!("not validation ser sort");
+        }
+    }
+}
+
+fn compare_by_start<S: StartEnd>(data_1: &[S], data_2: &[S]) -> bool {
+    if data_1.len() != data_2.len() {
+        return false;
+    }
+    for (s1, s2) in data_1.iter().zip(data_2.iter()) {
+        if s1.start() != s2.start() {
+            return false;
+        }
+    }
+    true
 }

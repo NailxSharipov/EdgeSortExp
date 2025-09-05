@@ -15,15 +15,12 @@ pub trait TwoKeysBinSortSerial<T> {
 
 impl<T: Copy> TwoKeysBinSortSerial<T> for [T] {
     fn sort_by_two_keys<K: SortKey>(&mut self, key1: SortKeyFn<T, K>, key2: SortKeyFn<T, K>) {
-        let layout = if let Some(layout) = BinLayout::with_keys(self, key1) {
-            layout
+        if let Some(layout) = BinLayout::with_keys(self, key1) {
+            layout.sort_by_two_keys(self, key1, key2);
         } else {
             // already sorted by key1
             self.sort_by_one_key(key2);
-            return;
         };
-
-        layout.sort_by_two_keys(self, key1, key2);
     }
 
     fn sort_by_two_keys_and_buffer<K: SortKey>(
@@ -32,14 +29,11 @@ impl<T: Copy> TwoKeysBinSortSerial<T> for [T] {
         key1: SortKeyFn<T, K>,
         key2: SortKeyFn<T, K>,
     ) {
-        let layout = if let Some(layout) = BinLayout::with_keys(self, key1) {
-            layout
+        if let Some(layout) = BinLayout::with_keys(self, key1) {
+            layout.sort_by_two_keys_and_buffer(self, buffer, key1, key2);
         } else {
             // already sorted by key1
-            self.sort_by_one_key(key2);
-            return;
-        };
-
-        layout.sort_by_two_keys_and_buffer(self, buffer, key1, key2);
+            self.sort_by_one_key_and_buffer(buffer, key2);
+        }
     }
 }

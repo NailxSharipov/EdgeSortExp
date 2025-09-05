@@ -16,6 +16,15 @@ impl<K: SortKey> BinLayout<K> {
         let mapper = self.spread_with_buffer(slice, buffer, key);
 
         if self.one_to_one() {
+            let mut k = key(&slice[0]);
+            for a in slice.iter() {
+                let ki = key(a);
+                if ki < k {
+                    dbg!();
+                }
+                k = ki;
+            }
+
             return;
         }
 

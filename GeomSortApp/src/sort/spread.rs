@@ -11,7 +11,7 @@ impl<K: SortKey> BinLayout<K> {
             mapper.inc_bin_count(self.index(key(a)));
         }
 
-        mapper.init_indices(array.len());
+        mapper.init_indices();
 
         for a in array.iter() {
             let index = mapper.next_index(self.index(key(a)));

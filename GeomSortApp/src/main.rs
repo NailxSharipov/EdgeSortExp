@@ -10,6 +10,6 @@ pub mod sort;
 
 fn main() {
     println!("Test App");
-    let test_0 = CheckerboardTest::new(4000);
+    let test_0 = CheckerboardTest::new(9);
     test_0.run_all();
 }
