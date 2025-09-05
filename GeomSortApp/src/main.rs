@@ -11,9 +11,9 @@ pub mod sort;
 
 fn main() {
     println!("Test App");
-    let test_0 = CheckerboardTest::new(1000);
+    let test_0 = CheckerboardTest::new(2000);
     test_0.run_all();
-    // test_0.run_custom()
+    // test_0.run_custom();
     //
     let test_1 = RandomTest::new(1000_000);
     test_1.run_all();
