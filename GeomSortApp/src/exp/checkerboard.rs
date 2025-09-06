@@ -32,11 +32,11 @@ impl CheckerboardTest {
         self.run_id_segments();
     }
 
-    // pub fn run_custom(&self) {
-    //     println!("Custom test n = {}", self.segments.len());
-    //     println!();
-    //     SortSolution::run_segments_par_bin_sort(&self.segments);
-    // }
+    pub fn run_custom(&self) {
+        println!("Custom test n = {}", self.segments.len());
+        println!();
+        SortSolution::run_segments_par_bin_sort(&self.segments);
+    }
 
     pub fn run_segments(&self) {
         println!("Segments test n = {}", self.segments.len());
