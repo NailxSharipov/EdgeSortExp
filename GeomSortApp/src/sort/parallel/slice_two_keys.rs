@@ -4,7 +4,6 @@ use crate::sort::parallel::cpu_count::CPUCount;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 
 pub trait TwoKeysBinSortParallel<T> {
-    #[inline]
     fn par_sort_by_two_keys<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &mut self,
         key1: F1,
@@ -12,7 +11,7 @@ pub trait TwoKeysBinSortParallel<T> {
     );
 }
 
-impl<T: Copy + Send> TwoKeysBinSortParallel<T> for [T] {
+impl<T: Copy + Send + Default> TwoKeysBinSortParallel<T> for [T] {
     #[inline]
     fn par_sort_by_two_keys<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &mut self,

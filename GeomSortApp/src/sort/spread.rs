@@ -17,13 +17,12 @@ impl<K: SortKey> BinLayout<K> {
 
         mapper.init_indices();
 
-        for a in slice.iter() {
-            let index = mapper.next_index(self.index(key(a)));
+        for val in slice.iter() {
+            let index = mapper.next_index(self.index(key(val)));
             unsafe {
-                *buffer.get_unchecked_mut(index) = *a;
+                *buffer.get_unchecked_mut(index) = *val;
             }
         }
-
         slice.copy_from_slice(buffer);
 
         mapper

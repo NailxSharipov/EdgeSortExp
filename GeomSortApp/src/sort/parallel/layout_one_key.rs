@@ -3,11 +3,11 @@ use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 use crate::sort::mid_layout::MidLayout;
 use crate::sort::parallel::partition::Partition;
 
-const MIN_LEN_PER_TASK: usize = 256_000;
+const MIN_LEN_PER_TASK: usize = 32_000;
 
 impl<K: SortKey> MidLayout<K> {
     #[inline]
-    pub fn par_sort_by_one_key<T: Copy + Send, F: KeyFn<T, K>>(&self, slice: &mut [T], key: F) {
+    pub fn par_sort_by_one_key<T: Copy + Send + Default, F: KeyFn<T, K>>(&self, slice: &mut [T], key: F) {
         let (left_layout, right_layout) = if let Some((left, right)) = self.children_layout() {
             (left, right)
         } else {

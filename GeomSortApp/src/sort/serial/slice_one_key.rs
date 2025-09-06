@@ -6,7 +6,7 @@ pub trait OneKeyBinSortSerial<T> {
     fn sort_by_one_key_and_buffer<K: SortKey, F: KeyFn<T, K>>(&mut self, buffer: &mut [T], key: F);
 }
 
-impl<T: Copy> OneKeyBinSortSerial<T> for [T] {
+impl<T: Copy + Default> OneKeyBinSortSerial<T> for [T] {
     #[inline]
     fn sort_by_one_key<K: SortKey, F: KeyFn<T, K>>(&mut self, key: F) {
         if let Some(layout) = BinLayout::with_keys(self, key) {

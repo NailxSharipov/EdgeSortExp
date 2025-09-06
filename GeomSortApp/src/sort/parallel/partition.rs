@@ -9,7 +9,7 @@ impl<T> Partition<T> for [T] {
     #[inline(always)]
     fn partition<K: SortKey, F: KeyFn<T, K>>(&mut self, mid_key: K, key: F) -> usize {
         let len = self.len();
-        let mut i = 0usize;
+        let mut i = 0;
         let mut j = len; // exclusive
 
         // SAFETY:

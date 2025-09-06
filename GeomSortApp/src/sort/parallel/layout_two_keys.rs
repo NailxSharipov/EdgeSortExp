@@ -7,7 +7,7 @@ const MIN_LEN_PER_TASK: usize = 32_000;
 
 impl<K: SortKey> MidLayout<K> {
     #[inline]
-    pub fn par_sort_by_two_keys<T: Copy + Send, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
+    pub fn par_sort_by_two_keys<T: Copy + Send + Default, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &self,
         slice: &mut [T],
         key1: F1,

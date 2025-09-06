@@ -3,16 +3,13 @@ use crate::sort::key::{KeyFn, SortKey};
 
 impl<K: SortKey> BinLayout<K> {
     #[inline]
-    pub fn sort_by_one_key<T: Copy, F: KeyFn<T, K>>(&self, slice: &mut [T], key: F) {
-        let mut buffer: Vec<T> = Vec::with_capacity(slice.len());
-        unsafe {
-            buffer.set_len(slice.len());
-        }
+    pub fn sort_by_one_key<T: Copy + Default, F: KeyFn<T, K>>(&self, slice: &mut [T], key: F) {
+        let mut buffer: Vec<T> = vec![T::default(); slice.len()];
         self.sort_by_one_key_and_buffer(slice, &mut buffer, key);
     }
 
     #[inline]
-    pub fn sort_by_one_key_and_buffer<T: Copy, F: KeyFn<T, K>>(
+    pub fn sort_by_one_key_and_buffer<T: Copy + Default, F: KeyFn<T, K>>(
         &self,
         slice: &mut [T],
         buffer: &mut [T],

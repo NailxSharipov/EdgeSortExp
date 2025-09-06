@@ -8,7 +8,7 @@ pub struct IndexSegment { // 24
 
 impl IndexSegment {
     #[inline(always)]
-    pub fn new(index: usize, s: &Segment) -> Self {
-        Self { seg: s.clone(), index }
+    pub fn new(index: usize, seg: &Segment) -> Self {
+        Self { seg: *seg, index }
     }
 }

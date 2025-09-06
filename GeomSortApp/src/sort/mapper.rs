@@ -1,10 +1,11 @@
 use crate::sort::bin_layout::MAX_BINS_COUNT;
 use std::ops::Range;
+use std::slice::{Iter, IterMut};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct Chunk {
-    pub(crate) index: usize,
-    pub(crate) count: usize,
+    index: usize,
+    count: usize,
 }
 
 pub struct Mapper {
@@ -13,6 +14,7 @@ pub struct Mapper {
 }
 
 impl Mapper {
+
     #[inline(always)]
     pub(crate) fn new(count: usize) -> Self {
         debug_assert!(count <= MAX_BINS_COUNT);
@@ -24,8 +26,7 @@ impl Mapper {
 
     #[inline(always)]
     pub(super) fn inc_bin_count(&mut self, chunk_index: usize) {
-        let chunk = unsafe { self.chunks.get_unchecked_mut(chunk_index) };
-        chunk.count += 1;
+        unsafe { self.chunks.get_unchecked_mut(chunk_index).count += 1 };
     }
 
     #[inline(always)]
@@ -39,16 +40,32 @@ impl Mapper {
     #[inline(always)]
     pub(super) fn init_indices(&mut self) {
         let mut offset = 0;
-        for chunk in self.chunks[..self.count].iter_mut() {
+        for chunk in self.mut_iter() {
             chunk.index = offset;
             offset += chunk.count;
         }
     }
+
+    #[inline(always)]
+    fn mut_iter(&mut self) -> IterMut<Chunk> {
+        unsafe { self.chunks.get_unchecked_mut(..self.count) }.iter_mut()
+    }
+
+    #[inline(always)]
+    pub(crate) fn iter(&self) -> Iter<Chunk> {
+        unsafe { self.chunks.get_unchecked(..self.count) }.iter()
+    }
+
 }
 
 impl Chunk {
     #[inline(always)]
-    pub(crate) fn to_range(&self) -> Range<usize> {
+    pub(crate) fn count(&self) -> usize {
+        self.count
+    }
+
+    #[inline(always)]
+    pub(crate) fn as_range(&self) -> Range<usize> {
         let end = self.index;
         let start = end - self.count;
         start..end

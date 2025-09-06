@@ -7,7 +7,7 @@ pub trait OneKeyBinSortParallel<T> {
     fn par_sort_by_one_key<K: SortKey, F: KeyFn<T, K>>(&mut self, key: F);
 }
 
-impl<T: Copy + Send> OneKeyBinSortParallel<T> for [T] {
+impl<T: Copy + Send + Default> OneKeyBinSortParallel<T> for [T] {
     #[inline]
     fn par_sort_by_one_key<K: SortKey, F: KeyFn<T, K>>(&mut self, key: F) {
         let cpu = CPUCount::count();

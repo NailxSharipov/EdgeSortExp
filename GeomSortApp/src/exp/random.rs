@@ -14,7 +14,7 @@ pub struct RandomTest {
 impl RandomTest {
 
     pub fn new(n: usize) -> Self {
-        let segments = Self::random_segments(n, -1000_000, 1000_000, 10_000);
+        let segments = Self::random_segments(n, -1_000_000_000, 1_000_000_000, 10_000);
         let index_segments: Vec<_> = segments.iter().enumerate().map(|(i, s)|IndexSegment::new(i, s)).collect();
         let id_segments: Vec<_> = segments.iter().enumerate().map(|(i, s)|IdSegment::new(i, s)).collect();
         Self {

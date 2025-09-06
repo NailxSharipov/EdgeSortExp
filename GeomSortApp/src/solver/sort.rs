@@ -43,7 +43,7 @@ impl SortSolution {
         Self::print_result("par_sort_stable", data.last().unwrap().end().x, start);
     }
 
-    pub fn run_segments_bin_sort<S: StartEnd + Copy>(segments: &[S]) {
+    pub fn run_segments_bin_sort<S: StartEnd + Copy + Default>(segments: &[S]) {
         let start = Instant::now();
 
         let mut data = segments.to_vec();
@@ -52,7 +52,7 @@ impl SortSolution {
         Self::print_result("bin_sort", data.last().unwrap().end().x, start);
     }
 
-    pub fn run_segments_par_bin_sort<S: StartEnd + Copy>(segments: &[S]) {
+    pub fn run_segments_par_bin_sort<S: StartEnd + Copy + Default>(segments: &[S]) {
         let start = Instant::now();
 
         let mut data = segments.to_vec();
@@ -66,7 +66,7 @@ impl SortSolution {
         println!("{} - {:.6} hash: {}", title, duration, result);
     }
 
-    pub fn run_compare<S: StartEnd + Copy>(segments: &[S]) {
+    pub fn run_compare<S: StartEnd + Copy + Default>(segments: &[S]) {
         println!("validation start");
         let mut data_0 = segments.to_vec();
         data_0.par_sort_by_two_keys(|s| s.start().x, |s| s.start().y);

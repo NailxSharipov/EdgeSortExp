@@ -9,6 +9,8 @@ pub(crate) struct MidLayout<K> {
     level: u32,
 }
 
+const MIN_LEN_TO_PARALLEL: usize = 64_000;
+
 impl<K> MidLayout<K>
 where
     K: SortKey,
@@ -44,7 +46,7 @@ where
 
     #[inline(always)]
     pub(crate) fn with_keys<T, F: KeyFn<T, K>>(array: &[T], key: F, cpu: usize) -> Option<Self> {
-        if array.is_empty() || cpu == 1 {
+        if array.len() < MIN_LEN_TO_PARALLEL || cpu == 1 {
             return None;
         }
 

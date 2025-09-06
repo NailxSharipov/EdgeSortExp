@@ -13,7 +13,8 @@ pub trait TwoKeysBinSortSerial<T> {
     );
 }
 
-impl<T: Copy> TwoKeysBinSortSerial<T> for [T] {
+impl<T: Copy + Default> TwoKeysBinSortSerial<T> for [T] {
+    #[inline]
     fn sort_by_two_keys<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(&mut self, key1: F1, key2: F2) {
         if let Some(layout) = BinLayout::with_keys(self, key1) {
             layout.sort_by_two_keys(self, key1, key2);
@@ -23,6 +24,7 @@ impl<T: Copy> TwoKeysBinSortSerial<T> for [T] {
         };
     }
 
+    #[inline]
     fn sort_by_two_keys_and_buffer<K: SortKey, F1: KeyFn<T, K>, F2: KeyFn<T, K>>(
         &mut self,
         buffer: &mut [T],
