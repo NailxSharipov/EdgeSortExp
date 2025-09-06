@@ -3,7 +3,7 @@ use crate::sort::serial::slice_one_key::OneKeyBinSortSerial;
 use crate::sort::mid_layout::MidLayout;
 use crate::sort::parallel::partition::Partition;
 
-const MIN_LEN_PER_TASK: usize = 32_000;
+const MIN_LEN_PER_TASK: usize = 16_000;
 
 impl<K: SortKey> MidLayout<K> {
     #[inline]

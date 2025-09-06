@@ -3,62 +3,84 @@ use crate::sort::parallel::slice_two_keys::TwoKeysBinSortParallel;
 use crate::sort::serial::slice_two_keys::TwoKeysBinSortSerial;
 use rayon::prelude::ParallelSliceMut;
 use std::time::Instant;
+use crate::geom::id_point::IdPoint;
 
 pub struct SortSolution;
 
 impl SortSolution {
     pub fn run_segments_sort_unstable<S: StartEnd>(segments: &[S]) {
+        let mut data = segments.to_vec();
         let start = Instant::now();
 
-        let mut data = segments.to_vec();
         data.sort_unstable_by(|s0, s1| s0.cmp_by_start(s1));
 
         Self::print_result("sort_unstable", data.last().unwrap().end().x, start);
     }
 
     pub fn run_segments_sort_stable<S: StartEnd>(segments: &[S]) {
+        let mut data = segments.to_vec();
+
         let start = Instant::now();
 
-        let mut data = segments.to_vec();
         data.sort_by(|s0, s1| s0.cmp_by_start(s1));
 
         Self::print_result("sort_stable", data.last().unwrap().end().x, start);
     }
 
     pub fn run_segments_par_sort_unstable<S: StartEnd>(segments: &[S]) {
+        let mut data = segments.to_vec();
+
         let start = Instant::now();
 
-        let mut data = segments.to_vec();
         data.par_sort_unstable_by(|s0, s1| s0.cmp_by_start(s1));
 
         Self::print_result("par_sort_unstable", data.last().unwrap().end().x, start);
     }
 
     pub fn run_segments_par_sort_stable<S: StartEnd>(segments: &[S]) {
+        let mut data = segments.to_vec();
+
         let start = Instant::now();
 
-        let mut data = segments.to_vec();
         data.par_sort_by(|s0, s1| s0.cmp_by_start(s1));
 
         Self::print_result("par_sort_stable", data.last().unwrap().end().x, start);
     }
 
     pub fn run_segments_bin_sort<S: StartEnd + Copy + Default>(segments: &[S]) {
+        let mut data = segments.to_vec();
+
         let start = Instant::now();
 
-        let mut data = segments.to_vec();
         data.sort_by_two_keys(|s| s.start().x, |s| s.start().y);
 
         Self::print_result("bin_sort", data.last().unwrap().end().x, start);
     }
 
     pub fn run_segments_par_bin_sort<S: StartEnd + Copy + Default>(segments: &[S]) {
+        let mut data = segments.to_vec();
         let start = Instant::now();
 
-        let mut data = segments.to_vec();
         data.par_sort_by_two_keys(|s| s.start().x, |s| s.start().y);
 
         Self::print_result("par bin_sort", data.last().unwrap().end().x, start);
+    }
+
+    pub fn run_segments_ref_sort<S: StartEnd + Copy + Default>(segments: &[S]) {
+        let start = Instant::now();
+
+        let mut rfs: Vec<_> = segments.iter().enumerate().map(|(i, s)|IdPoint::new(i, *s.start())).collect();
+
+        rfs.par_sort_by_two_keys(|s| s.start().x, |s| s.start().y);
+
+        let mut data = vec![S::default(); segments.len()];
+        for (rf, s) in rfs.iter().zip(segments.iter()) {
+            unsafe {
+                *data.get_unchecked_mut(rf.id) = *s;
+            }
+        }
+
+        Self::print_result("ref sort", data.last().unwrap().end().x, start);
     }
 
     fn print_result(title: &str, result: i32, start: Instant) {

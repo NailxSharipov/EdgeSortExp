@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use crate::geom::id_point::IdPoint;
 use crate::geom::id_segment::IdSegment;
 use crate::geom::index_segm::IndexSegment;
 use crate::geom::point::Point;
@@ -46,5 +47,16 @@ impl StartEnd for IdSegment {
     #[inline(always)]
     fn end(&self) -> &Point {
         &self.b.point
+    }
+}
+
+impl StartEnd for IdPoint {
+    #[inline(always)]
+    fn start(&self) -> &Point {
+        &self.point
+    }
+    #[inline(always)]
+    fn end(&self) -> &Point {
+        &self.point
     }
 }
